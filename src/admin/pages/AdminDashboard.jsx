@@ -7,7 +7,7 @@ import {
   FaTimes
 } from "react-icons/fa";
 import { Link } from "react-router-dom";
-import { handleaddnewpet } from "../../services/allAPI";
+import { handleaddnewpet, handlegetadminsellingpets, handleupdatenewpet } from "../../services/allAPI";
 import { useEffect } from "react";
 
 function AdminDashboard() {
@@ -15,9 +15,12 @@ function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
   const [showAddPetModal, setShowAddPetModal] = useState(false);
    const [token, settoken] = useState("");
+  const [petsForSale,setpetsForSale]=useState([])
+   // edit modal
+  const [showeditPetModal, setshoweditPetModal] = useState(false);
 
   const [newpetDetails, setnewpetDetails] = useState({
-    
+   
     petname:"",
     age:"",
     gender:"",
@@ -27,7 +30,21 @@ function AdminDashboard() {
     imageURL:""
 
   });
+
+   const [editpetDetails, seteditpetDetails] = useState({
+   
+    petname:"",
+    age:"",
+    gender:"",
+    location:"",
+    breed:"",
+    price:"",
+    imageURL:""
+
+  });
+  console.log(editpetDetails);
   console.log(newpetDetails);
+  console.log(petsForSale);
   
   const reset=()=>{
     setnewpetDetails({
@@ -39,7 +56,18 @@ function AdminDashboard() {
     price:"",
     imageURL:""
     })
+    seteditpetDetails({
+      petname:"",
+    age:"",
+    gender:"",
+    location:"",
+    breed:"",
+    price:"",
+    imageURL:""
+    })
   }
+
+  
   const addnewpet=async()=>{
    const reqheader={
       "Authorization":`Bearer ${token}`
@@ -58,12 +86,54 @@ function AdminDashboard() {
       
     }
   }
+// console.log(token);
+
+  const getallsellingpets=async()=>{
+    
+  const reqheader = {
+    Authorization: `Bearer ${token}`
+  }
+    try {
+      const getallsellingpets=await handlegetadminsellingpets(reqheader)
+      console.log(getallsellingpets);
+      setpetsForSale(getallsellingpets.data)
+      
+    } catch (error) {
+      console.log(error);
+      
+    }
+  }
+  const logout=()=>{
+    sessionStorage.removeItem("token")
+    
+  }
+
+  const updatesellingpet=async()=>{
+    const reqheader = {
+    Authorization: `Bearer ${token}`
+  }
+   try {
+      const updatesellingpets=await handleupdatenewpet(editpetDetails,reqheader)
+      console.log(updatesellingpets);
+      if (updatesellingpets.status==200) {
+        alert(`updated`)
+      }
+      
+    } catch (error) {
+      console.log(error);
+      
+    }
+  }
 
   useEffect(()=>{
     if (sessionStorage.getItem("token")) {
       settoken(sessionStorage.getItem("token"))
     }
-  },[])
+    
+      getallsellingpets()
+    
+    
+  },[token,editpetDetails])
 
   // Mock Data
   const stats = {
@@ -84,11 +154,11 @@ function AdminDashboard() {
     { id: 1005, type: "buy", name: "Rahul Verma", pet: "German Shepherd Puppy", price: 38000, time: "3 hours ago", status: "pending" }
   ];
 
-  const petsForSale = [
-    { id: 1, name: "Max", breed: "Golden Retriever", age: "8 weeks", price: 32000, status: "active", breeder: "Sunshine Kennels" },
-    { id: 2, name: "Bella", breed: "Persian Cat", age: "10 weeks", price: 22000, status: "active", breeder: "Royal Cats" },
-    { id: 3, name: "Rocky", breed: "German Shepherd", age: "9 weeks", price: 38000, status: "sold", breeder: "Elite Kennel" }
-  ];
+  // const petsForSale = [
+  //   { id: 1, name: "Max", breed: "Golden Retriever", age: "8 weeks", price: 32000, status: "active", breeder: "Sunshine Kennels" },
+  //   { id: 2, name: "Bella", breed: "Persian Cat", age: "10 weeks", price: 22000, status: "active", breeder: "Royal Cats" },
+  //   { id: 3, name: "Rocky", breed: "German Shepherd", age: "9 weeks", price: 38000, status: "sold", breeder: "Elite Kennel" }
+  // ];
 
   const menuItems = [
     { icon: FaHome, label: "Overview", id: "overview" },
@@ -153,7 +223,7 @@ function AdminDashboard() {
 
           {/* Logout */}
           <div className="p-6 border-t border-gray-800">
-            <button className="w-full flex items-center gap-4 px-5 py-4 rounded-xl hover:bg-red-900/50 text-gray-300 hover:text-white transition">
+            <button onClick={()=>{logout()}} className="w-full flex items-center gap-4 px-5 py-4 rounded-xl hover:bg-red-900/50 text-gray-300 hover:text-white transition">
               <FaSignOutAlt className="text-2xl" />
               {sidebarOpen && <Link to={"/"}><span className="font-medium text-lg">Logout</span></Link>}
             </button>
@@ -263,9 +333,9 @@ function AdminDashboard() {
                       <div className="flex items-center gap-8">
                         <div className="bg-gray-800 border-2 border-dashed rounded-xl w-32 h-32" />
                         <div>
-                          <h3 className="text-2xl font-bold">{pet.name}</h3>
+                          <h3 className="text-2xl font-bold">{pet.petname}</h3>
                           <p className="text-xl text-purple-400">{pet.breed} • {pet.age}</p>
-                          <p className="text-gray-400">by {pet.breeder}</p>
+                          <p className="text-gray-400">location: {pet.location}</p>
                           <p className="text-3xl font-bold text-yellow-500 mt-3">₹{pet.price.toLocaleString()}</p>
                         </div>
                       </div>
@@ -273,7 +343,7 @@ function AdminDashboard() {
                         <span className={`px-4 py-2 rounded-full font-bold ${pet.status === "active" ? "bg-green-600" : "bg-gray-600"}`}>
                           {pet.status.toUpperCase()}
                         </span>
-                        <button className="text-blue-400 hover:text-blue-300 text-2xl"><FaEdit /></button>
+                        <button onClick={()=>{setshoweditPetModal(true),seteditpetDetails(pet)}} className="text-blue-400 hover:text-blue-300 text-2xl"><FaEdit /></button>
                         <button className="text-red-400 hover:text-red-300 text-2xl"><FaTrashAlt /></button>
                       </div>
                     </div>
@@ -333,8 +403,61 @@ function AdminDashboard() {
               <button onClick={() => {setShowAddPetModal(false),reset()}} className="px-10 py-4 bg-gray-700 hover:bg-gray-600 rounded-xl font-bold">
                 Cancel
               </button>
-              <button onClick={()=>{addnewpet()}} className="px-12 py-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 rounded-xl font-bold text-xl shadow-xl">
+              <button onClick={()=>{addnewpet(),reset(),setShowAddPetModal(false)}} className="px-12 py-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 rounded-xl font-bold text-xl shadow-xl">
                 Publish Pet
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showeditPetModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-gray-900 rounded-2xl shadow-2xl max-w-4xl w-full p-10 border border-purple-600">
+            <div className="flex justify-between items-center mb-8">
+              <h2 className="text-4xl font-bold text-white">Edit Pet for Sale</h2>
+              <button onClick={() => setshoweditPetModal(false)} className="text-3xl hover:text-gray-400">
+                <FaTimes />
+              </button>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-8">
+              <div>
+                <label className="block text-gray-300 mb-2">Pet Name</label>
+                <input value={editpetDetails.petname} onChange={(e) => seteditpetDetails({...editpetDetails,petname:e.target.value})} className="w-full px-5 py-4 bg-gray-800 rounded-lg focus:ring-4 focus:ring-purple-600 outline-none" placeholder="e.g., Max" />
+              </div>
+              <div>
+                <label className="block text-gray-300 mb-2">Breed</label>
+                <input value={editpetDetails.breed} onChange={(e) => seteditpetDetails({...editpetDetails,breed:e.target.value})} className="w-full px-5 py-4 bg-gray-800 rounded-lg focus:ring-4 focus:ring-purple-600 outline-none" placeholder="e.g., Golden Retriever" />
+              </div>
+              <div>
+                <label className="block text-gray-300 mb-2">Age</label>
+                <input value={editpetDetails.age}onChange={(e) => seteditpetDetails({...editpetDetails,age:e.target.value})} className="w-full px-5 py-4 bg-gray-800 rounded-lg focus:ring-4 focus:ring-purple-600 outline-none" placeholder="e.g., 8 weeks" />
+              </div>
+              <div>
+                <label className="block text-gray-300 mb-2">Price (₹)</label>
+                <input value={editpetDetails.price} onChange={(e) => seteditpetDetails({...editpetDetails,price:e.target.value})} type="number" className="w-full px-5 py-4 bg-gray-800 rounded-lg focus:ring-4 focus:ring-purple-600 outline-none" placeholder="32000" />
+              </div>
+              <div>
+                <label className="block text-gray-300 mb-2">Image URL</label>
+                <input value={editpetDetails.imageURL} onChange={(e) => seteditpetDetails({...editpetDetails,imageURL:e.target.value})} className="w-full px-5 py-4 bg-gray-800 rounded-lg focus:ring-4 focus:ring-purple-600 outline-none" />
+              </div>
+              <div>
+                <label className="block text-gray-300 mb-2">Location</label>
+                <input value={editpetDetails.location} onChange={(e) => seteditpetDetails({...editpetDetails,location:e.target.value})} className="w-full px-5 py-4 bg-gray-800 rounded-lg focus:ring-4 focus:ring-purple-600 outline-none" placeholder="Kochi, Kerala" />
+              </div>
+              <div>
+                <label className="block text-gray-300 mb-2">Gender</label>
+                <input value={editpetDetails.gender} onChange={(e) => seteditpetDetails({...editpetDetails,gender:e.target.value})} className="w-full px-5 py-4 bg-gray-800 rounded-lg focus:ring-4 focus:ring-purple-600 outline-none" placeholder="eg..,male" />
+              </div>
+            </div>
+
+            <div className="mt-8 flex gap-6 justify-end">
+              <button onClick={() => {setshoweditPetModal(false),reset()}} className="px-10 py-4 bg-gray-700 hover:bg-gray-600 rounded-xl font-bold">
+                Cancel
+              </button>
+              <button onClick={()=>{reset(),setshoweditPetModal(false),updatesellingpet()}} className="px-12 py-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 rounded-xl font-bold text-xl shadow-xl">
+                Update Pet
               </button>
             </div>
           </div>

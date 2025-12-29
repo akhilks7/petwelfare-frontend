@@ -7,23 +7,23 @@ import { Link } from "react-router-dom";
 function Header() {
     const [open, setOpen] = useState(false);
     const [profileOpen, setProfileOpen] = useState(false);
-    const [token, settoken] = useState(false);
-    // smooth scroll function
+    const [token, setToken] = useState(false);
+
     const scrollToSection = (id) => {
         const section = document.getElementById(id);
         if (section) {
             section.scrollIntoView({ behavior: "smooth" });
         }
-        setOpen(false); // close mobile menu
+        setOpen(false);
     };
 
-    useEffect(()=>{
+    useEffect(() => {
         if (sessionStorage.getItem("token")) {
-            settoken(true)
-        }else{
-            settoken(false)
+            setToken(true);
+        } else {
+            setToken(false);
         }
-    })
+    }, []); // Added dependency array
 
     return (
         <>
@@ -52,46 +52,53 @@ function Header() {
                         </ul>
                     </nav>
 
-                    {token?
-                        <div className="hidden lg:flex items-center gap-4 relative">
-                                  <button
+                    {/* Auth Section - Desktop */}
+                    <div className="hidden lg:flex items-center">
+                        {token ? (
+                            <div className="relative">
+                                <button
                                     onClick={() => setProfileOpen(!profileOpen)}
                                     className="flex items-center gap-3 hover:bg-orange-50 px-4 py-2 rounded-xl transition"
-                                  >
+                                >
                                     <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-amber-500 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-md">
-                                      A
+                                        A
                                     </div>
                                     <span className="font-semibold text-gray-800">Alex P.</span>
                                     <svg className={`w-5 h-5 transition ${profileOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                     </svg>
-                                  </button>
-                        
-                                  {/* Dropdown */}
-                                  {profileOpen && (
+                                </button>
+
+                                {/* Dropdown */}
+                                {profileOpen && (
                                     <div className="absolute top-16 right-0 w-56 bg-white rounded-2xl shadow-2xl border border-orange-100 p-4">
-                                      <Link to="/userprofile" className="flex items-center gap-3 px-4 py-3 hover:bg-orange-50 rounded-xl transition">
-                                        <FaRegUser className="text-orange-600" /> My Profile
-                                      </Link>
-                                      
-                                      <hr className="my-3 border-orange-100" />
-                                      <Link to={"/"}>
-                                          <button className="w-full flex items-center gap-3 px-4 py-3 hover:bg-red-50 rounded-xl text-red-600 font-medium transition">
+                                        <Link to="/userprofile" className="flex items-center gap-3 px-4 py-3 hover:bg-orange-50 rounded-xl transition">
+                                            <FaRegUser className="text-orange-600" /> My Profile
+                                        </Link>
+                                        <hr className="my-3 border-orange-100" />
+                                        <button
+                                            onClick={() => {
+                                                sessionStorage.removeItem("token");
+                                                window.location.href = "/"; // or use navigate
+                                            }}
+                                            className="w-full flex items-center gap-3 px-4 py-3 hover:bg-red-50 rounded-xl text-red-600 font-medium transition"
+                                        >
                                             <FaSignOutAlt /> Logout
-                                          </button>
-                                      </Link>
+                                        </button>
                                     </div>
-                                  )}
-                                </div>
-                        
-                        :
-                        
-                        <Link to="/login">
-                            <button className="mt-4 w-full bg-orange-600 hover:bg-orange-700 py-2 rounded-lg font-semibold">
-                                <FaRegUser className="inline mr-2" /> Login / Register
-                            </button>
-                        </Link>}
-                    {/* Mobile Menu Btn */}
+                                )}
+                            </div>
+                        ) : (
+                            <Link to="/login">
+                                <button className="flex items-center gap-3 hover:bg-orange-50 px-6 py-3 rounded-xl transition font-semibold text-gray-800 border-2 border-orange-500 hover:border-orange-600">
+                                    <FaRegUser className="text-orange-600 text-lg" />
+                                    Login / Register
+                                </button>
+                            </Link>
+                        )}
+                    </div>
+
+                    {/* Mobile Menu Button */}
                     <button
                         className="md:hidden text-3xl text-gray-700"
                         onClick={() => setOpen(!open)}
@@ -100,29 +107,46 @@ function Header() {
                     </button>
                 </div>
 
-                {/* Mobile Dropdown */}
+                {/* Mobile Dropdown Menu */}
                 {open && (
-                    <div className="md:hidden bg-gray-900 text-white px-6 py-4">
-                        <ul className="flex flex-col gap-4 text-lg">
-                            <li onClick={() => scrollToSection("home")} className="hover:text-orange-400 cursor-pointer">Home</li>
-                            <li onClick={() => scrollToSection("pets")} className="hover:text-orange-400 cursor-pointer">Pets</li>
-                            <li onClick={() => scrollToSection("services")} className="hover:text-orange-400 cursor-pointer">Services</li>
-                            <li onClick={() => scrollToSection("about")} className="hover:text-orange-400 cursor-pointer">About</li>
-                            <li onClick={() => scrollToSection("contact")} className="hover:text-orange-400 cursor-pointer">Contact</li>
+                    <div className="md:hidden bg-white border-t border-gray-200 px-6 py-6">
+                        <ul className="flex flex-col gap-5 text-lg font-medium text-gray-700">
+                            <li onClick={() => scrollToSection("home")} className="hover:text-orange-600 cursor-pointer">Home</li>
+                            <li onClick={() => scrollToSection("pets")} className="hover:text-orange-600 cursor-pointer">Pets</li>
+                            <li onClick={() => scrollToSection("services")} className="hover:text-orange-600 cursor-pointer">Services</li>
+                            <li onClick={() => scrollToSection("about")} className="hover:text-orange-600 cursor-pointer">About</li>
+                            <li onClick={() => scrollToSection("contact")} className="hover:text-orange-600 cursor-pointer">Contact</li>
                         </ul>
-                        {token?
-                        <Link to="/userprofile" className="flex items-center gap-3 px-4 py-3 hover:bg-orange-50 rounded-xl transition">
-                                        <FaRegUser className="text-orange-600" /> My Profile
-                                      </Link>
-                        
-                        :
-                        
-                        <Link to="/login">
-                            <button className="mt-4 w-full bg-orange-600 hover:bg-orange-700 py-2 rounded-lg font-semibold">
-                                <FaRegUser className="inline mr-2" /> Login / Register
-                            </button>
-                        </Link>}
-                        
+
+                        <div className="mt-6 pt-6 border-t border-gray-200">
+                            {token ? (
+                                <>
+                                    <Link
+                                        to="/userprofile"
+                                        className="block px-4 py-3 hover:bg-orange-50 rounded-xl transition font-medium"
+                                        onClick={() => setOpen(false)}
+                                    >
+                                        <FaRegUser className="inline mr-2 text-orange-600" /> My Profile
+                                    </Link>
+                                    <button
+                                        onClick={() => {
+                                            sessionStorage.removeItem("token");
+                                            window.location.href = "/";
+                                        }}
+                                        className="w-full mt-2 px-4 py-3 hover:bg-red-50 rounded-xl text-red-600 font-medium transition text-left"
+                                    >
+                                        <FaSignOutAlt className="inline mr-2" /> Logout
+                                    </button>
+                                </>
+                            ) : (
+                                <Link to="/login" onClick={() => setOpen(false)}>
+                                    <button className="w-full flex items-center justify-center gap-3 bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 rounded-xl transition font-semibold shadow-md">
+                                        <FaRegUser className="text-lg" />
+                                        Login / Register
+                                    </button>
+                                </Link>
+                            )}
+                        </div>
                     </div>
                 )}
             </header>

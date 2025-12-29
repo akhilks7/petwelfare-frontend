@@ -1,70 +1,68 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import {
-  FaMapMarkerAlt, FaClock, FaPaw, FaExclamationTriangle, FaFilter,
-  FaDog, FaCat, FaPhoneAlt, FaCalendarAlt, FaTimes, FaInfoCircle,
-  FaHeart
+  FaPaw, FaMapMarkerAlt, FaFilter, FaTimes, FaPhoneAlt,
+  FaWhatsapp, FaExclamationTriangle, FaClock, FaHeart
 } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { handlegetstraypets } from "../../services/allAPI";
+import SERVERURL from "../../services/serverURL";
 
 function StrayList() {
   const [filter, setFilter] = useState("all");
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [selectedReport, setSelectedReport] = useState(null);
 
-  const strayReports = [
-    // ... (your same data array - unchanged)
-    {
-      id: 1,
-      type: "Injured Dog",
-      animal: "Street Dog",
-      condition: "Injured / Bleeding",
-      location: "MG Road, Near Shenoy's Theatre, Kochi",
-      time: "2 hours ago",
-      status: "rescue-dispatched",
-      images: 3,
-      reporter: "Anonymous",
-      contact: "+91 98*** ****",
-      description: "Dog hit by bike. Bleeding from left hind leg. Limping badly. Seen near Shenoy's signal. Very scared but not aggressive.",
-      reportedAt: "Today, 3:45 PM",
-      updatedAt: "Rescue team reached spot at 5:20 PM",
-      rescueTeam: "Kochi Street Paws Rescue"
-    },
-    // ... rest of your reports
-    {
-      id: 6,
-      type: "Starving Cat",
-      animal: "Adult Cat",
-      condition: "Normal but Hungry",
-      location: "Marine Drive Walkway",
-      time: "Yesterday",
-      status: "feeding",
-      images: 3,
-      reporter: "Priya M.",
-      contact: "+91 8089*****",
-      description: "Thin grey cat meowing loudly near walkway. Eats everything given. Very gentle. Locals feeding daily but needs permanent solution.",
-      reportedAt: "Yesterday, 8:40 AM",
-      updatedAt: "Regular feeding point established",
-      rescueTeam: "Marine Drive Cat Lovers"
+  const [strayanimals, setstrayanimals] = useState([]);
+  const [token, settoken] = useState("");
+
+  // Fetch stray animals
+  const getallstrayanimals = async () => {
+    if (!token) return;
+    const reqheader = { Authorization: `Bearer ${token}` };
+    try {
+      const result = await handlegetstraypets(reqheader);
+      const data = result?.data || [];
+      setstrayanimals(data);
+    } catch (error) {
+      console.error("Error fetching stray animals:", error);
+      setstrayanimals([]);
     }
-  ];
+  };
 
-  const filteredReports = filter === "all" 
-    ? strayReports 
-    : strayReports.filter(r => r.status === filter);
+  useEffect(() => {
+    const stored = sessionStorage.getItem("token");
+    if (stored) settoken(stored);
+  }, []);
 
+  useEffect(() => {
+    if (token) getallstrayanimals();
+  }, [token]);
+
+  // Filter reports
+  const filteredReports = filter === "all"
+  ? strayanimals
+  : strayanimals.filter(r => r.condition === filter);
+
+  const openReportModal = (report) => {
+    setCurrentImageIndex(0);
+    setSelectedReport(report);
+  };
+
+  // Status Badge
   const getStatusBadge = (status) => {
+    const baseClasses = "px-4 py-2 rounded-full font-bold text-sm flex items-center gap-2";
     switch (status) {
       case "rescue-dispatched":
-        return <span className="bg-green-100 text-green-800 px-5 py-3 rounded-full font-bold flex items-center gap-2"><FaPaw /> Rescue Team Dispatched</span>;
+        return <span className={`${baseClasses} bg-green-100 text-green-800`}><FaPaw /> Rescue Sent</span>;
       case "feeding":
-        return <span className="bg-blue-100 text-blue-800 px-5 py-3 rounded-full font-bold flex items-center gap-2"><FaHeart /> Daily Feeding Active</span>;
+        return <span className={`${baseClasses} bg-blue-100 text-blue-800`}><FaHeart /> Being Fed</span>;
       case "awaiting":
-        return <span className="bg-yellow-100 text-yellow-800 px-5 py-3 rounded-full font-bold flex items-center gap-2"><FaClock /> Awaiting Help</span>;
+        return <span className={`${baseClasses} bg-yellow-100 text-yellow-800`}><FaClock /> Awaiting Help</span>;
       case "urgent":
-        return <span className="bg-red-100 text-red-800 px-6 py-4 rounded-full font-bold text-lg animate-pulse flex items-center gap-3"><FaExclamationTriangle /> URGENT ACTION NEEDED</span>;
+        return <span className={`${baseClasses} bg-red-100 text-red-800 animate-pulse`}><FaExclamationTriangle /> URGENT</span>;
       default:
-        return null;
+        return <span className={`${baseClasses} bg-gray-100 text-gray-700`}>Reported</span>;
     }
   };
 
@@ -72,204 +70,261 @@ function StrayList() {
     <>
       <Header />
 
-      <div className="min-h-screen bg-gradient-to-b from-amber-50 to-orange-100">
-
-        {/* Hero Section (you can add back if needed) */}
-        {/* ... */}
-
-        {/* Filters */}
-        <div className="container mx-auto px-6 mt-24 mb-12">
-          <div className="bg-white rounded-3xl shadow-2xl p-6 md:p-8 flex flex-wrap items-center justify-between gap-6 border-4 border-amber-300">
-            <div className="flex items-center gap-4">
-              <FaFilter className="text-3xl md:text-4xl text-amber-700" />
-              <h3 className="text-2xl md:text-3xl font-bold text-gray-800">Filter Reports</h3>
-            </div>
-            <div className="flex flex-wrap gap-4">
-              {["all", "urgent", "rescue-dispatched", "feeding", "awaiting"].map((f) => (
-                <button
-                  key={f}
-                  onClick={() => setFilter(f)}
-                  className={`px-6 py-3 md:px-8 md:py-4 rounded-2xl font-bold text-sm md:text-lg transition transform hover:scale-105 ${
-                    filter === f
-                      ? "bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-xl"
-                      : "bg-amber-100 text-amber-800 hover:bg-amber-200"
-                  }`}
-                >
-                  {f === "all" ? "All Reports" : 
-                   f === "urgent" ? "Urgent Only" :
-                   f === "rescue-dispatched" ? "Rescue Sent" :
-                   f === "feeding" ? "Being Fed" : "Awaiting Help"}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Reports Grid */}
-        <div className="container mx-auto px-6 pb-20">
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredReports.map((report) => (
-              <div
-                key={report.id}
-                className={`bg-white rounded-3xl shadow-2xl overflow-hidden border-6 transition-all duration-500 hover:shadow-3xl ${
-                  report.status === "urgent" ? "border-red-600 animate-pulse" :
-                  report.status === "rescue-dispatched" ? "border-green-600" :
-                  report.status === "feeding" ? "border-blue-600" : "border-amber-600"
-                }`}
-              >
-                <div className="h-64 bg-gradient-to-br from-amber-200 to-orange-300 relative">
-                  <div className="absolute inset-0 flex items-center justify-center opacity-20">
-                    <FaPaw className="text-8xl text-white" />
-                  </div>
-                  <div className="absolute top-4 left-4 bg-black/80 text-white px-4 py-2 rounded-full font-bold">
-                    {report.images} Photos
-                  </div>
-                  <div className="absolute bottom-4 left-4 bg-black/80 text-white px-4 py-2 rounded-full font-bold flex items-center gap-2 text-sm">
-                    {report.animal.includes("Dog") ? <FaDog /> : <FaCat />} {report.animal}
-                  </div>
-                </div>
-
-                <div className="p-6">
-                  <h3 className="text-2xl font-bold text-gray-800 mb-3">{report.type}</h3>
-                  
-                  <div className="space-y-4 text-gray-700 text-sm">
-                    <p className="flex items-center gap-3">
-                      <FaExclamationTriangle className="text-amber-700" />
-                      <span className="font-medium">{report.condition}</span>
-                    </p>
-                    <p className="flex items-start gap-3">
-                      <FaMapMarkerAlt className="text-red-600 text-lg mt-0.5" />
-                      <span>{report.location}</span>
-                    </p>
-                    <p className="flex items-center gap-3 text-gray-600">
-                      <FaCalendarAlt className="text-sm" />
-                      {report.time}
-                    </p>
-                  </div>
-
-                  <div className="my-6">
-                    {getStatusBadge(report.status)}
-                  </div>
-
-                  <button
-                    onClick={() => setSelectedReport(report)}
-                    className="w-full bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-bold py-4 rounded-2xl shadow-xl transition-all"
-                  >
-                    View Full Report
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+      {/* Compact Amber Filter Bar */}
+     {/* Compact Amber Filter Bar */}
+<div className="bg-amber-50 border-b-8 border-amber-600 sticky top-23 z-40 shadow-xl">
+  <div className="container mx-auto px-4 py-2">
+    <div className="flex flex-wrap gap-4 items-center justify-center">
+      <div className="flex items-center gap-3 text-amber-800 font-bold">
+        <FaFilter className="text-xl" />
+        <span className="text-lg">Filter Reports</span>
+        <span className="bg-amber-600 text-white px-3 py-1 rounded-full text-sm">
+          {filteredReports.length} Reports
+        </span>
       </div>
 
-      {/* FIXED RESPONSIVE MODAL */}
+      {/* EXACT MATCH FILTERS - DO NOT CHANGE SPELLING OR SPACING */}
+      {[
+        "all",
+        "Injured / Bleeding",
+        "Sick / Weak",
+        "Pregnant / Nursing",
+        "Aggressive",
+        "Friendly / Approaching People",
+        "Normal but Hungry"
+      ].map((f) => (
+        <button
+          key={f}
+          onClick={() => setFilter(f === "all" ? "all" : f)}
+          className={`px-5 py-3 rounded-xl font-medium transition ${
+            filter === (f === "all" ? "all" : f)
+              ? "bg-amber-600 text-white shadow-lg"
+              : "bg-white text-amber-800 border border-amber-300 hover:bg-amber-100"
+          }`}
+        >
+          {f === "all" ? "All Reports" : f}
+        </button>
+      ))}
+    </div>
+  </div>
+</div>
+
+      {/* Compact Grid */}
+      <div className="container mx-auto px-4 py-10 mt-17">
+        {filteredReports.length === 0 ? (
+          <div className="text-center py-20">
+            <FaPaw className="text-8xl text-amber-200 mx-auto mb-6 opacity-40" />
+            <p className="text-2xl text-gray-600 font-semibold">No active stray reports</p>
+            <p className="text-gray-500 mt-2">New reports will appear here when submitted</p>
+          </div>
+        ) : (
+          <div className="grid grid-col sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {filteredReports.map((report) => {
+              const firstPhoto = report.photos && report.photos.length > 0 ? report.photos[0] : null;
+
+              return (
+                <div
+                  key={report._id}
+                  onClick={() => openReportModal(report)}
+                  className="bg-white rounded-2xl shadow-xl overflow-hidden border-4 border-amber-200 hover:border-amber-600 transition-all duration-300 cursor-pointer group"
+                >
+                  {/* Status Tag */}
+                  <div className="text-center py-2 font-bold text-sm bg-amber-600 text-white">
+                    {report.status?.toUpperCase().replace("-", " ") || "REPORTED"}
+                  </div>
+
+                  {/* Image */}
+                  <div className="relative h-52 bg-gray-100">
+                    {firstPhoto ? (
+                      <img
+                        src={`${SERVERURL}/uploadImages/${firstPhoto}`}
+                        alt="Stray animal"
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <FaPaw className="text-5xl text-gray-300" />
+                      </div>
+                    )}
+
+                    {/* Photos Count */}
+                    {report.photos && report.photos.length > 1 && (
+                      <div className="absolute top-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-xs">
+                        +{report.photos.length - 1}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Info */}
+                  <div className="p-4 text-center">
+                    <h3 className="font-bold text-lg text-gray-800 truncate">
+                      {report.animaltype || "Stray Animal"}
+                    </h3>
+                    <p className="text-amber-600 text-sm truncate">{report.location}</p>
+                    {getStatusBadge(report.status || "awaiting")}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Compact & Caring Modal */}
       {selectedReport && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-3xl shadow-3xl w-full max-w-4xl max-h-screen overflow-y-auto border-8 border-amber-500">
-            {/* Header */}
-            <div className="bg-gradient-to-r from-amber-600 to-orange-700 text-white p-6 md:p-8 rounded-t-3xl sticky top-0 z-10">
-              <div className="flex justify-between items-start">
+        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4" onClick={() => setSelectedReport(null)}>
+          <div
+            className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border-8 border-amber-600"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close */}
+            <button
+              onClick={() => setSelectedReport(null)}
+              className="absolute top-3 right-3 bg-red-700 hover:bg-red-800 text-white w-10 h-10 rounded-full flex items-center justify-center text-2xl shadow-lg z-10"
+            >
+              <FaTimes />
+            </button>
+
+            {/* Image Carousel */}
+            {selectedReport.photos && selectedReport.photos.length > 0 ? (
+              <div className="relative">
+                <div className="overflow-hidden rounded-t-3xl">
+                  <div
+                    className="flex transition-transform duration-500 ease-in-out"
+                    style={{ transform: `translateX(-${currentImageIndex * 100}%)` }}
+                  >
+                    {selectedReport.photos.map((photo, index) => (
+                      <img
+                        key={index}
+                        src={`${SERVERURL}/uploadImages/${photo}`}
+                        alt={`Stray animal - ${index + 1}`}
+                        className="w-full h-72 object-cover flex-shrink-0"
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                {selectedReport.photos.length > 1 && (
+                  <>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCurrentImageIndex(prev => prev === 0 ? selectedReport.photos.length - 1 : prev - 1);
+                      }}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-black/80 text-white w-10 h-10 rounded-full flex items-center justify-center text-2xl shadow-lg"
+                    >
+                      ‹
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCurrentImageIndex(prev => prev === selectedReport.photos.length - 1 ? 0 : prev + 1);
+                      }}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-black/80 text-white w-10 h-10 rounded-full flex items-center justify-center text-2xl shadow-lg"
+                    >
+                      ›
+                    </button>
+
+                    <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
+                      {selectedReport.photos.map((_, index) => (
+                        <div
+                          key={index}
+                          className={`w-2 h-2 rounded-full transition-all ${
+                            index === currentImageIndex ? "bg-white w-8" : "bg-white/60"
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+            ) : (
+              <div className="h-72 bg-amber-100 flex items-center justify-center rounded-t-3xl">
+                <FaPaw className="text-7xl text-amber-300 opacity-50" />
+              </div>
+            )}
+
+            {/* Report Details */}
+            <div className="p-6 text-center">
+              <div className="bg-amber-600 text-white py-3 rounded-2xl font-bold text-xl mb-6">
+                STRAY ANIMAL REPORT
+              </div>
+
+              <h2 className="text-4xl font-bold text-gray-800 mb-2">{selectedReport.animaltype}</h2>
+              {selectedReport.condition && (
+                <p className="text-xl text-amber-700 font-semibold mb-4">
+                  Condition: {selectedReport.condition}
+                </p>
+              )}
+
+              <div className="grid grid-cols-2 gap-6 py-6 border-y-2 border-amber-200">
                 <div>
-                  <h2 className="text-3xl md:text-5xl font-bold">{selectedReport.type}</h2>
-                  <p className="text-lg md:text-2xl mt-2 opacity-90">{selectedReport.animal}</p>
+                  <FaMapMarkerAlt className="text-3xl text-red-600 mx-auto mb-2" />
+                  <p className="font-bold text-lg">{selectedReport.location}</p>
                 </div>
-                <button
-                  onClick={() => setSelectedReport(null)}
-                  className="text-3xl md:text-4xl hover:bg-white/20 rounded-full p-3 transition"
-                >
-                  <FaTimes />
-                </button>
-              </div>
-            </div>
-
-            {/* Scrollable Content */}
-            <div className="p-6 md:p-10 space-y-8">
-              {/* Photos */}
-              <div>
-                <h3 className="text-xl md:text-2xl font-bold text-gray-800 mb-4 flex items-center gap-3">
-                  <FaPaw /> Photos ({selectedReport.images})
-                </h3>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {[...Array(selectedReport.images)].map((_, i) => (
-                    <div key={i} className="aspect-square bg-gray-200 border-4 border-dashed rounded-2xl flex items-center justify-center">
-                      <FaPaw className="text-4xl md:text-6xl text-gray-400" />
-                    </div>
-                  ))}
+                <div>
+                  {getStatusBadge(selectedReport.status || "awaiting")}
                 </div>
               </div>
 
-              {/* Details Grid */}
-              <div className="grid md:grid-cols-2 gap-6 text-sm md:text-base">
-                <div className="space-y-5">
-                  <div>
-                    <p className="text-gray-600 font-semibold">Condition</p>
-                    <p className="text-xl font-bold text-amber-700">{selectedReport.condition}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-600 font-semibold">Location</p>
-                    <p className="flex items-center gap-2 text-gray-800">
-                      <FaMapMarkerAlt className="text-red-600" /> {selectedReport.location}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-gray-600 font-semibold">Reported</p>
-                    <p>{selectedReport.reportedAt}</p>
-                  </div>
-                </div>
-
-                <div className="space-y-5">
-                  <div>
-                    <p className="text-gray-600 font-semibold">Status</p>
-                    <div className="mt-2">{getStatusBadge(selectedReport.status)}</div>
-                  </div>
-                  {selectedReport.rescueTeam && (
-                    <div>
-                      <p className="text-gray-600 font-semibold">Rescue Team</p>
-                      <p className="text-lg font-bold text-green-700">{selectedReport.rescueTeam}</p>
-                    </div>
-                  )}
-                  {selectedReport.contact && (
-                    <div>
-                      <p className="text-gray-600 font-semibold">Contact</p>
-                      <p className="text-xl font-bold text-green-700 flex items-center gap-2">
-                        <FaPhoneAlt /> {selectedReport.contact}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Description */}
-              <div>
-                <h3 className="text-xl font-bold text-gray-800 mb-3">Full Description</h3>
-                <p className="text-gray-700 bg-amber-50 p-5 rounded-2xl border-l-8 border-amber-600 leading-relaxed">
-                  {selectedReport.description}
+              <div className="my-8 text-left">
+                <h3 className="text-2xl font-bold text-gray-800 mb-3">Description</h3>
+                <p className="text-gray-700 bg-amber-50 p-5 rounded-2xl leading-relaxed">
+                  {selectedReport.bio || "No description provided."}
                 </p>
               </div>
 
-              {/* Update */}
-              <div>
-                <p className="text-lg font-bold text-gray-800 mb-2">Latest Update</p>
-                <p className="bg-gray-100 p-4 rounded-xl text-gray-700">
-                  {selectedReport.updatedAt}
-                </p>
-              </div>
+              {selectedReport.contactno && (
+                <div className="mt-8 space-y-4">
+                  {/* Call Button */}
+                  <a
+                    href={`tel:${selectedReport.contactno}`}
+                    className="block w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold text-2xl py-6 rounded-2xl shadow-2xl flex items-center justify-center gap-4 transition transform hover:scale-105"
+                  >
+                    <FaPhoneAlt className="text-3xl" />
+                    CALL REPORTER
+                  </a>
 
-              {/* Close Button */}
-              <div className="text-center pt-4 pb-6">
-                <button
-                  onClick={() => setSelectedReport(null)}
-                  className="px-12 py-5 bg-gray-800 hover:bg-gray-900 text-white font-bold text-xl rounded-2xl shadow-xl transition transform hover:scale-105"
-                >
-                  Close Report
-                </button>
-              </div>
+                  {/* WhatsApp Button */}
+                  <a
+                    href={`https://wa.me/${selectedReport.contactno.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(
+                      `Hi! I saw your stray animal report in ${selectedReport.location}. How can I help?`
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold text-2xl py-6 rounded-2xl shadow-2xl flex items-center justify-center gap-4 transition transform hover:scale-105"
+                  >
+                    <FaWhatsapp className="text-3xl" />
+                    MESSAGE ON WHATSAPP
+                  </a>
+
+                  <p className="text-center text-gray-600 mt-4 font-medium text-lg">
+                    {selectedReport.contactno}
+                  </p>
+                </div>
+              )}
+
+              <p className="text-center text-amber-700 font-bold text-lg mt-10">
+                Every report helps save a life ❤️ Thank you!
+              </p>
             </div>
           </div>
         </div>
       )}
+
+      {/* Compassionate CTA */}
+      {/* <section className="bg-gradient-to-b from-amber-100 to-orange-50 py-16 text-center">
+        <div className="container mx-auto px-6">
+          <FaPaw className="text-8xl text-amber-600 mx-auto mb-6" />
+          <h2 className="text-5xl font-bold text-gray-800 mb-6">See a Stray in Need?</h2>
+          <p className="text-2xl text-gray-700 max-w-3xl mx-auto mb-10">
+            Your report can connect them with food, medical care, or a loving home.
+          </p>
+          <button className="bg-amber-600 hover:bg-amber-700 text-white font-bold text-2xl px-16 py-6 rounded-3xl shadow-2xl hover:shadow-amber-600/50 transform hover:scale-110 transition-all">
+            Report a Stray Now
+          </button>
+        </div>
+      </section> */}
 
       <Footer />
     </>

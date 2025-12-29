@@ -1,7 +1,9 @@
 import React from "react";
 import { FaFacebook, FaInstagram, FaTwitter, FaPaw } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 function Footer() {
+  const navigate = useNavigate();
   return (
     <footer className="bg-[#ffcb68] text-[#4a2f0b] pt-12 pb-6 mt-1">
 
@@ -48,7 +50,7 @@ function Footer() {
           <h2 className="text-xl font-semibold text-[#4a2f0b] mb-4">Quick Links</h2>
           <ul className="space-y-3">
             {["Home", "Pets", "Adoption Info", "Pet Care", "Contact"].map((item) => (
-              <li
+              <li onClick={()=>navigate(`/${item.toLowerCase().replace(/ & /g, "-").replace(/ /g, "-")}`)}
                 key={item}
                 className="hover:text-white hover:translate-x-1 transition-all cursor-pointer"
               >
@@ -82,7 +84,7 @@ function Footer() {
         <div>
           <h2 className="text-xl font-semibold text-[#4a2f0b] mb-4">Contact Us</h2>
           <p className="mb-2">📍 PetHub Center, Kochi, India</p>
-          <p className="mb-2">📞 +91 98765 43210</p>
+          <p className="mb-2">📞 +91 6235452818</p>
           <p className="mb-2">✉ support@pethub.com</p>
         </div>
       </div>

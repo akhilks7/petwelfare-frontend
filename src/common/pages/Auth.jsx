@@ -1,9 +1,12 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { FaUser, FaEnvelope, FaLock, FaArrowLeft } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { handleLoginAPI, handleregisterAPI } from "../../services/allAPI";
+import { toast } from "react-toastify";
+import { userProfileUpdateContent } from "../../context/ContextShare";
 
 function Auth({ register }) {
+  const{setuserProfileUpdateStatus}=useContext(userProfileUpdateContent)
   const navigate = useNavigate()
   const [showPassword, setShowPassword] = useState(false);
   const [data, setdata] = useState({
@@ -16,7 +19,7 @@ function Auth({ register }) {
 
   const handlelogin = async () => {
     if (data.email == "" || data.password == "") {
-      alert("please fill in all feilds")
+      toast.warning("please fill in all feilds")
     } else {
       try {
         const result = await handleLoginAPI(data)
@@ -24,19 +27,20 @@ function Auth({ register }) {
         if (result.status == 200 && result.data.existinguser.role == "user") {
           settoken(result.data.tocken)
           console.log(result.data.tocken);
-          alert("loginned succssfully")
+          toast.success("loginned succssfully")
+          setuserProfileUpdateStatus(true)
           navigate("/UserDashboard")
           sessionStorage.setItem("token", result.data.tocken)
           sessionStorage.setItem("userdetails", JSON.stringify(result.data.existinguser))
         } else if (result.status == 200 && result.data.existinguser.role == "admin"){
           settoken(result.data.tocken)
           console.log(result.data.tocken);
-          alert("loginned succssfully")
+          toast.success("loginned succssfully")
           navigate("/admindashboard")
           sessionStorage.setItem("token", result.data.tocken)
           sessionStorage.setItem("userdetails", JSON.stringify(result.data.existinguser))
         }else{
-          alert("something went wrong")
+          toast.error("something went wrong")
         }
       } catch (error) {
         console.log(error);
@@ -50,12 +54,12 @@ function Auth({ register }) {
   const handleRegister = async () => {
     try {
       if (data.username == "" || data.email == "" || data.password == "") {
-        alert(`please fill in all feilds`)
+        toast.warning(`please fill in all feilds`)
       } else {
        const result = await handleregisterAPI(data)
         console.log(result);
         if (result.status == 200) {
-          alert(`registeration success`)
+          toast.success(`registeration success`)
           navigate("/login")
         }
 

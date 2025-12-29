@@ -1,8 +1,10 @@
 import React from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import { useNavigate } from "react-router-dom";
 
 function LandingPage() {
+  const navigate = useNavigate();
   return (
     <>
       <Header />
@@ -21,7 +23,7 @@ function LandingPage() {
               Connect with adorable pets, adopt your favorite companion, and
               explore our pet-friendly world.
             </p>
-            <button className="mt-6 bg-orange-600 hover:bg-orange-700 text-white px-8 py-3 rounded-xl font-semibold transition">
+            <button onClick={() => navigate("/login")} className="mt-6 bg-orange-600 hover:bg-orange-700 text-white px-8 py-3 rounded-xl font-semibold transition">
               Explore Pets
             </button>
           </div>
@@ -50,7 +52,7 @@ function LandingPage() {
               expert advice from trained animal lovers. We aim to create a safe,
               joyful, and caring environment for every pet lover.
             </p>
-            <button className="mt-6 bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded-xl transition font-semibold w-fit">
+            <button onClick={() => navigate("/login")} className="mt-6 bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded-xl transition font-semibold w-fit">
               Learn More
             </button>
           </div>
@@ -95,7 +97,7 @@ function LandingPage() {
               <p className="text-gray-600 mt-2">
                 Quick & reliable service available 24/7.
               </p>
-              <button className="mt-4 bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded-lg transition">
+              <button onClick={() => navigate("/login")} className="mt-4 bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded-lg transition">
                 Learn More
               </button>
             </div>
@@ -119,7 +121,7 @@ function LandingPage() {
             {
               name: "Persian Cat",
               price: "₹18,000",
-              img: "https://images.pexels.com/photos/1569348/pexels-photo-1569348.jpeg",
+              img: "https://puppiezo.com/wp-content/uploads/2025/06/PERISAN-CAT-DOLL-FACE-2-scaled.jpg",
             },
             {
               name: "German Shepherd",
@@ -139,7 +141,7 @@ function LandingPage() {
               <div className="p-6">
                 <h3 className="text-2xl font-bold text-gray-800">{pet.name}</h3>
                 <p className="text-gray-600 mt-2">Price: {pet.price}</p>
-                <button className="mt-4 bg-orange-600 hover:bg-orange-700 w-full text-white px-6 py-2 rounded-lg transition font-semibold">
+                <button onClick={() => navigate("/login")} className="mt-4 bg-orange-600 hover:bg-orange-700 w-full text-white px-6 py-2 rounded-lg transition font-semibold">
                   Know More / Explore
                 </button>
               </div>
@@ -149,7 +151,7 @@ function LandingPage() {
 
         {/* Explore More Button */}
         <div className="flex justify-center mt-10">
-          <button className="bg-black hover:bg-gray-800 text-white px-10 py-3 rounded-xl font-semibold transition">
+          <button onClick={() => navigate("/login")} className="bg-black hover:bg-gray-800 text-white px-10 py-3 rounded-xl font-semibold transition">
             Explore More Pets
           </button>
         </div>
@@ -189,7 +191,7 @@ function LandingPage() {
               Have questions or need help? Our friendly team is here for you.
             </p>
             <p className="font-semibold">📍 Kochi, Kerala</p>
-            <p className="font-semibold mt-2">📞 +91 98765 43210</p>
+            <p className="font-semibold mt-2">📞 +91 6235452818</p>
             <p className="font-semibold mt-2">📧 support@pethub.com</p>
           </div>
 

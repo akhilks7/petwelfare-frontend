@@ -1,8 +1,17 @@
-import React from "react";
+import React, { useContext } from "react";
 import { FaPaw, FaFacebook, FaInstagram, FaTwitter, FaHeart, FaHome, FaUser, FaSignOutAlt, FaSearch } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { userProfileUpdateContent } from "../../context/ContextShare";
 
 function Footer() {
+  const {setuserProfileUpdateStatus}=useContext(userProfileUpdateContent)
+  const navigate=useNavigate ()
+  const logout=()=>{
+    sessionStorage.removeItem("token")
+    setuserProfileUpdateStatus(false)
+    sessionStorage.removeItem("userdetails")
+    navigate("/")
+  }
   return (
     <footer className="bg-gradient-to-t from-[#ffcb68] to-[#ffd8a8] text-[#4a2f0b] pt-16 pb-8 mt-20">
 
@@ -86,7 +95,7 @@ function Footer() {
 
           <div className="mt-8">
             <Link to="/login">
-              <button className="w-full bg-[#4a2f0b] hover:bg-[#3a2409] text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-3 transition-all shadow-xl hover:shadow-2xl transform hover:scale-105">
+              <button onClick={()=>{logout()}} className="w-full bg-[#4a2f0b] hover:bg-[#3a2409] text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-3 transition-all shadow-xl hover:shadow-2xl transform hover:scale-105">
                 <FaSignOutAlt /> Logout
               </button>
             </Link>

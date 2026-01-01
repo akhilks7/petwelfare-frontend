@@ -4,9 +4,12 @@ import { Link, useNavigate } from "react-router-dom";
 import { handleLoginAPI, handleregisterAPI } from "../../services/allAPI";
 import { toast } from "react-toastify";
 import { userProfileUpdateContent } from "../../context/ContextShare";
+import { userAuthContext } from "../../context/AuthContext";
 
 function Auth({ register }) {
-  const{setuserProfileUpdateStatus}=useContext(userProfileUpdateContent)
+  const { setuserProfileUpdateStatus } = useContext(userProfileUpdateContent)
+  // const{setpageload}=useContext(userProfileUpdateContent)
+  const { setrole } = useContext(userAuthContext)
   const navigate = useNavigate()
   const [showPassword, setShowPassword] = useState(false);
   const [data, setdata] = useState({
@@ -18,6 +21,7 @@ function Auth({ register }) {
   console.log(data);
 
   const handlelogin = async () => {
+
     if (data.email == "" || data.password == "") {
       toast.warning("please fill in all feilds")
     } else {
@@ -27,19 +31,29 @@ function Auth({ register }) {
         if (result.status == 200 && result.data.existinguser.role == "user") {
           settoken(result.data.tocken)
           console.log(result.data.tocken);
+          // setpageload(result.data.existinguser.role)
+          setrole(result.data.existinguser.role)
           toast.success("loginned succssfully")
           setuserProfileUpdateStatus(true)
-          navigate("/UserDashboard")
+
           sessionStorage.setItem("token", result.data.tocken)
           sessionStorage.setItem("userdetails", JSON.stringify(result.data.existinguser))
-        } else if (result.status == 200 && result.data.existinguser.role == "admin"){
+          setTimeout(() => {
+            navigate("/UserDashboard")
+          }, 1300)
+        } else if (result.status == 200 && result.data.existinguser.role == "admin") {
           settoken(result.data.tocken)
           console.log(result.data.tocken);
+          // setpageload(result.data.existinguser.role)
+          setrole(result.data.existinguser.role)
           toast.success("loginned succssfully")
           navigate("/admindashboard")
           sessionStorage.setItem("token", result.data.tocken)
           sessionStorage.setItem("userdetails", JSON.stringify(result.data.existinguser))
-        }else{
+          setTimeout(() => {
+            navigate("/admindashboard")
+          }, 1300)
+        } else {
           toast.error("something went wrong")
         }
       } catch (error) {
@@ -56,7 +70,7 @@ function Auth({ register }) {
       if (data.username == "" || data.email == "" || data.password == "") {
         toast.warning(`please fill in all feilds`)
       } else {
-       const result = await handleregisterAPI(data)
+        const result = await handleregisterAPI(data)
         console.log(result);
         if (result.status == 200) {
           toast.success(`registeration success`)

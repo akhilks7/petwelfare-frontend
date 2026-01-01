@@ -13,16 +13,19 @@ import FoundPets from './user/pages/FoundPets'
 import AdminDashboard from './admin/pages/AdminDashboard'
 import StrayList from './user/pages/StrayList'
 import { ToastContainer, Bounce } from "react-toastify";
-import { useContext } from 'react'
+import { useContext, useEffect } from 'react'
 import { userAuthContext } from './context/AuthContext'
 import PaymentSucess from './user/pages/PaymentSucess'
 import PaymentError from './user/pages/PaymentError'
 
 function App() {
-  const{role}=useContext(userAuthContext)
-  if (!role) {
-    return
-  }
+  const { role } = useContext(userAuthContext)
+
+  useEffect(() => {
+    if (!role) {
+      // window.location.reload()
+    }
+  }, [])
   return (
     <>
       <Routes>
@@ -32,27 +35,27 @@ function App() {
         <Route path='/register' element={<Auth register />} />
 
         {/* user */}
-        {role=="user"&&
-        <>
-          <Route path='/UserDashboard' element={<UserDashboard />} />
-          <Route path='/adoptpets' element={<PetAdoptions />} />
-          <Route path='/userprofile' element={<UserProfile />} />
-          <Route path='/petforsale' element={<PetForSale />} />
-          <Route path='/lostpets' element={<LostPets />} />
-          <Route path='/foundpets' element={<FoundPets />} />
-          <Route path='/straylist' element={<StrayList />} />
-          <Route path='/payment-success' element={<PaymentSucess />} />
-          <Route path='/payment-error' element={<PaymentError />} />
-        </>}
+        {role == "user" &&
+          <>
+            <Route path='/UserDashboard' element={<UserDashboard />} />
+            <Route path='/adoptpets' element={<PetAdoptions />} />
+            <Route path='/userprofile' element={<UserProfile />} />
+            <Route path='/petforsale' element={<PetForSale />} />
+            <Route path='/lostpets' element={<LostPets />} />
+            <Route path='/foundpets' element={<FoundPets />} />
+            <Route path='/straylist' element={<StrayList />} />
+            <Route path='/payment-success' element={<PaymentSucess />} />
+            <Route path='/payment-error' element={<PaymentError />} />
+          </>}
 
         {/* ----------------admin----------------- */}
-        {role=="admin"&&
-        <Route path='/admindashboard' element={<AdminDashboard />} />
+        {role == "admin" &&
+          <Route path='/admindashboard' element={<AdminDashboard />} />
         }
         <Route path='*' element={<Pnf />} />
       </Routes>
 
-       <ToastContainer
+      <ToastContainer
         position="top-right"
         autoClose={5000}
         hideProgressBar={false}

@@ -4,11 +4,13 @@ export const userProfileUpdateContent = createContext()
 
 function ContextShare({ children }) {
     const [userProfileUpdateStatus, setuserProfileUpdateStatus] = useState(false)
+    const [pageload, setpageload] = useState(null)
+
     useEffect(() => {
-            
-        }, [userProfileUpdateStatus])
+
+    }, [userProfileUpdateStatus,pageload])
     return (
-        <userProfileUpdateContent.Provider value={{ userProfileUpdateStatus, setuserProfileUpdateStatus }}>
+        <userProfileUpdateContent.Provider value={{ userProfileUpdateStatus, setuserProfileUpdateStatus,setpageload }}>
             {children}
         </userProfileUpdateContent.Provider>
     )

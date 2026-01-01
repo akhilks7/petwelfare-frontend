@@ -157,14 +157,17 @@ function Header() {
           </div>
 
           <nav className="flex flex-col gap-4 text-lg font-medium">
-            <Link to="/dashboard" className="flex items-center gap-3 py-3 hover:bg-white/20 rounded-xl px-4 transition">
+            <Link to="/UserDashboard" className="flex items-center gap-3 py-3 hover:bg-white/20 rounded-xl px-4 transition">
               <FaHome /> Dashboard
             </Link>
-            <Link to="/adopt" className="flex items-center gap-3 py-3 hover:bg-white/20 rounded-xl px-4 transition">
+            <Link to="/adoptpets" className="flex items-center gap-3 py-3 hover:bg-white/20 rounded-xl px-4 transition">
               <FaHeart /> Adopt a Pet
             </Link>
-            <Link to="/buy" className="flex items-center gap-3 py-3 hover:bg-white/20 rounded-xl px-4 transition">
+            <Link to="/petforsale" className="flex items-center gap-3 py-3 hover:bg-white/20 rounded-xl px-4 transition">
               <FaShoppingCart /> Buy Pets
+            </Link>
+            <Link to="/straylist" className="flex items-center gap-3 py-3 hover:bg-white/20 rounded-xl px-4 transition">
+              <FaHome /> Stray animals
             </Link>
             <div>
               <button
@@ -195,14 +198,16 @@ function Header() {
               )}
             </div>
 
-            <Link to="/profile" className="flex items-center gap-3 py-3 hover:bg-white/20 rounded-xl px-4 transition">
+            <Link to="/userprofile" className="flex items-center gap-3 py-3 hover:bg-white/20 rounded-xl px-4 transition">
               <FaRegUser /> My Profile
             </Link>
           </nav>
 
-          <button onClick={() => { logout() }} className="mt-6 w-full bg-white text-orange-600 font-bold py-3 rounded-xl flex items-center justify-center gap-3 hover:bg-gray-100 transition shadow-lg">
-            <FaSignOutAlt /> Logout
-          </button>
+          <Link to={"/"}>
+            <button onClick={() => { logout() }} className="mt-6 w-full bg-white text-orange-600 font-bold py-3 rounded-xl flex items-center justify-center gap-3 hover:bg-gray-100 transition shadow-lg">
+              <FaSignOutAlt /> Logout
+            </button>
+          </Link>
         </div>
       )}
     </header>

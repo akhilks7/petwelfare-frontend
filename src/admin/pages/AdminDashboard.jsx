@@ -373,6 +373,12 @@ function AdminDashboard() {
         toast.success("Pet status updated successfully!");
       }
       getallpets()
+      getallsellingpets()
+    getalldonatingpets()
+    getalllostpets()
+    getallfoundpets()
+    getallusers()
+    getallstraypets();
 
     } catch (error) {
       console.log(error);
